@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: cd src/backend && npm install
     startCommand: cd src/backend && node server.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -15,7 +16,7 @@ services:
       - key: FRONTEND_URL
         value: https://frontend-liart-three-59.vercel.app
       - key: SQLITE_PATH
-        value: ./data/impactmatch.db
+        value: /opt/render/project/src/src/backend/data/impactmatch.db
     disk:
       name: sqlite-data
       mountPath: /opt/render/project/src/src/backend/data
