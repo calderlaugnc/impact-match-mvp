@@ -13,4 +13,10 @@ services:
       - key: PORT
         value: 10000
       - key: FRONTEND_URL
-        value: https://impact-match.vercel.app
+        value: https://frontend-liart-three-59.vercel.app
+      - key: SQLITE_PATH
+        value: ./data/impactmatch.db
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/src/backend/data
+      sizeGB: 1
