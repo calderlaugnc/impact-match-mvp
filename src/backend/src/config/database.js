@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/impactmatch.db');
+const DB_PATH = process.env.SQLITE_PATH || process.env.DB_PATH || path.join(__dirname, '../../data/impactmatch.db');
 let db;
 
 function initializeDatabase() {
@@ -15,7 +15,7 @@ function initializeDatabase() {
     
     db = new sqlite3.Database(DB_PATH, (err) => {
       if (err) return reject(err);
-      console.log('Connected to SQLite database');
+      console.log('Connected to SQLite database at', DB_PATH);
       
       db.exec(`
         CREATE TABLE IF NOT EXISTS users (
