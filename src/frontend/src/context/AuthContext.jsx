@@ -2,6 +2,17 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
+// 模擬用戶數據（開發測試用）
+const MOCK_USER = {
+  id: 1,
+  company_name: '測試企業有限公司',
+  contact_name: '陳先生',
+  email: 'admin@impactmatch.hk',
+  role: 'user'
+};
+
+const MOCK_TOKEN = 'mock-jwt-token-for-development';
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +37,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // 開發用：一鍵模擬登入
+  const devLogin = () => {
+    localStorage.setItem('token', MOCK_TOKEN);
+    localStorage.setItem('user', JSON.stringify(MOCK_USER));
+    setUser(MOCK_USER);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, devLogin }}>
       {children}
     </AuthContext.Provider>
   );

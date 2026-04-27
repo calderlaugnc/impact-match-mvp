@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, devLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,6 +24,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDevLogin = () => {
+    devLogin();
+    navigate('/dashboard');
   };
 
   return (
@@ -69,6 +74,16 @@ export default function LoginPage() {
             {loading ? '登入中...' : '登入'}
           </button>
         </form>
+        
+        <div className="border-t pt-4">
+          <button
+            onClick={handleDevLogin}
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+          >
+            ⚡ 開發者快速登入（跳過驗證）
+          </button>
+          <p className="text-center text-xs text-gray-400 mt-2">本地測試專用，一鍵進入系統</p>
+        </div>
         
         <p className="text-center text-sm text-gray-600">
           還沒有帳號？ <Link to="/register" className="text-blue-600 hover:underline">立即註冊</Link>
