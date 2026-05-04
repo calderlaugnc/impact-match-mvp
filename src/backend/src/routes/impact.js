@@ -1,8 +1,68 @@
 const express = require('express');
 const { getDb } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Admin: detailed platform-wide impact dashboard
+router.get('/admin/summary', authenticateToken, requireAdmin, (req, res, next) => {
+  try {
+    const db = getDb();
+
+    const totalSE = db.prepare('SELECT COUNT(*) as count FROM social_enterprises').get();
+    const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products').get();
+    const totalUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
+    const totalMatches = db.prepare('SELECT COUNT(*) as count FROM matches').get();
+    const totalReports = db.prepare(
+      'SELECT SUM(total_beneficiaries) as beneficiaries, SUM(total_spending) as spending, COUNT(*) as count FROM reports'
+    ).get();
+
+    const matchTrend = db.prepare(
+      `SELECT DATE(created_at) as date, COUNT(*) as count
+       FROM matches
+       WHERE created_at >= date('now', '-30 days')
+       GROUP BY DATE(created_at)
+       ORDER BY date`
+    ).all();
+
+    const topCategories = db.prepare(
+      `SELECT json_extract(request_data, '$.category') as category, COUNT(*) as count
+       FROM matches
+       GROUP BY category
+       ORDER BY count DESC`
+    ).all();
+
+    const seByTag = db.prepare(
+      `SELECT p.tags, s.name
+       FROM products p
+       JOIN social_enterprises s ON p.se_id = s.id
+       WHERE p.tags IS NOT NULL`
+    ).all();
+
+    res.json({
+      platform: {
+        social_enterprises: totalSE.count,
+        products: totalProducts.count,
+        registered_companies: totalUsers.count,
+        total_matches: totalMatches.count,
+        total_reports: totalReports.count,
+        total_beneficiaries: totalReports.beneficiaries || 0,
+        total_spending: totalReports.spending || 0
+      },
+      match_trend: matchTrend,
+      top_categories: topCategories.map(c => ({
+        category: c.category,
+        label: c.category === 'employee_benefit' ? 'Employee Benefit' :
+               c.category === 'procurement' ? 'Procurement' :
+               c.category === 'workshop' ? 'Workshop/Event' : 'Other',
+        count: c.count
+      })),
+      se_by_tag: seByTag
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Platform-wide impact summary
 router.get('/summary', (req, res, next) => {

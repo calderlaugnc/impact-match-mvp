@@ -71,6 +71,12 @@ export default function DashboardPage() {
               className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium">
               瀏覽社企
             </Link>
+            {user?.role === 'admin' && (
+              <Link to="/admin/social-enterprises"
+                className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">
+                管理後台
+              </Link>
+            )}
           </div>
         </div>
 

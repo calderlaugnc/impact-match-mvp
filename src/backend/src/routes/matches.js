@@ -1,6 +1,6 @@
 const express = require('express');
 const { getDb } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const matchingService = require('../services/matching');
 
 const router = express.Router();
@@ -32,6 +32,30 @@ router.post('/', authenticateToken, (req, res, next) => {
         }
       );
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Admin: get all matches with user info
+router.get('/admin/all', authenticateToken, requireAdmin, (req, res, next) => {
+  try {
+    const db = getDb();
+    db.all(
+      `SELECT m.*, u.company_name, u.contact_name, u.email as user_email
+       FROM matches m
+       LEFT JOIN users u ON m.user_id = u.id
+       ORDER BY m.created_at DESC`,
+      [],
+      (err, matches) => {
+        if (err) return next(err);
+        res.json(matches.map(m => ({
+          ...m,
+          request_data: JSON.parse(m.request_data),
+          results: JSON.parse(m.results || '[]')
+        })));
+      }
+    );
   } catch (err) {
     next(err);
   }
